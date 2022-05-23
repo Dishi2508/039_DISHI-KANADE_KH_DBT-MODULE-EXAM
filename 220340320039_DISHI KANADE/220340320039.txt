@@ -1,0 +1,195 @@
+SECTION I
+
+1. DEPT TABLE
+
+	DEPTNO	   DNAME	              LOC
+	
+	   10	       ACCOUNTING	    NEW YORK
+	   20	       RESEARCH	             DALLAS
+	   30	         SALES	             CHICAGO
+	   40	       OPERATIONS	      BOSTON
+	
+2. EMP TABLE 
+
+	EMPNO	      ENAME	              JOB	           HIREDATE	     SAL	                 COMM	            DEPTNO
+	
+	7839	           KING         MANAGER	                 1991-11-17 	   5000.00		         NULL                  10
+	7698	          BLAKE	           CLERK	       1981-05-01	    2850.00		         NULL                  30
+	7782	          CLARK	        MANAGER	                1981-06-09	    2450.00		         NULL                  10
+	7566           	JONES	          CLERK	                1981-04-02	    2975.00		         NULL                  20
+	7654	        MARTIN	       SALESMAN	               1981-09-28	    1250.00	                1400.00	               30
+	7499	         ALLEN	       SALESMAN	                1981-02-20	    1600.00	                300.00	               30
+	
+-- Q3. Display all the employees where SAL between 2500 and 5000 (inclusive of both).
+
+SELECT EMPNO , ENAME FROM EMP 
+WHERE SAL BETWEEN 2500 AND 5000;
+	
+	EMPNO	    ENAME
+	
+	7839	        KING
+	7698	        BLAKE
+	7566	        JONES
+	
+-- Q4. Display all the ENAMEs in descending order of ENAME.
+
+SELECT ENAME FROM EMP 
+ORDER BY ENAME DESC;
+
+	ENAME
+	
+	MARTIN
+	KING
+	JONES
+	CLARK
+	BLAKE
+	ALLEN
+	
+-- Q5. Display all the JOBs in lowercase.
+
+SELECT LOWER(JOB) FROM EMP;
+
+	LOWER(JOB)
+	
+	manager
+	clerk
+	manager
+	clerk
+	salesman
+	salesman
+	
+-- Q6. Display the ENAMEs and the lengths of the ENAMEs.
+
+SELECT ENAME , LENGTH(ENAME) FROM EMP;
+
+	ENAME	    LENGTH(ENAME)
+
+	KING	          4
+	BLAKE	          5
+	CLARK             5
+	JONES	          5
+	MARTIN	          6
+	ALLEN             5
+	
+-- Q7. Display the DEPTNO and the count of employees who belong to that DEPTNO 
+
+SELECT DEPTNO , COUNT(ENAME) FROM EMP
+GROUP BY DEPTNO
+ORDER BY DEPTNO;
+
+	DEPTNO	                  COUNT(ENAME)
+	
+	10	                         2
+	20	                         1
+	30	                         3
+	
+-- Q8. Display the DNAMEs and the ENAMEs who belong to that DNAME.
+
+SELECT DNAME , ENAME FROM EMP , DEPT
+WHERE DEPT.DEPTNO = EMP.DEPTNO;
+
+	DNAME	                    ENAME
+	
+	ACCOUNTING	            KING
+	SALES	                    BLAKE
+	ACCOUNTING	            CLARK
+	RESEARCH	            JONES
+	SALES	                   MARTIN
+	SALES	                   ALLEN
+	
+-- Q10. Display the HRA for each employee given that HRA is 20% of SAL.
+
+SELECT ENAME , SAL , SAL * 0.2 'HRA' FROM EMP;
+
+	ENAME	                          SAL	             HRA
+	
+	KING	                        5000.00	          1000.00
+	BLAKE	                        2850.00	           570.00
+	CLARK	                        2450.00	           490.00
+	JONES	                        2975.00	           595.00
+	MARTIN	                        1250.00	           250.00
+	ALLEN	                       1600.00               320.00
+	
+	
+SECTION II 
+
+Q1. Write a stored procedure by the name of PROC1 that accepts two varchar strings as parameters. Your procedure 
+should then determine if the first varchar string exists inside the varchar string. For example, if string1 = ‘DAC’ and 
+string2 = ‘CDAC, then string1 exists inside string2.  The stored procedure should insert the appropriate message into a 
+suitable TEMPP output table. Calling program for the stored procedure need not be written.
+
+CREATE TABLE TEMPP
+(
+MSG VARCHAR(30)
+);
+
+DELIMITER //
+CREATE PROCEDURE PROC1(A VARCHAR(30) , B VARCHAR(30))
+BEGIN 
+DECLARE STRING1 VARCHAR(30);
+DECLARE STRING2 VARCHAR(30);
+DECLARE X VARCHAR(30);
+SET STRING1 = A;
+SET STRING2 = B;
+SET X = SUBSTR(STRING1, 1 , 1);
+IF (INSTR(STRING2 , X)) != NULL THEN
+	INSERT INTO TEMPP VALUES('STRING 1 NOT FOUND IN STRING 2');
+ELSE
+	INSERT INTO TEMPP VALUES('STRING 1 FOUND IN STRING 2');
+END IF;
+END; //
+DELIMITER ;
+
+DROP PROCEDURE PROC1;
+CALL PROC1('DAC' , 'CDAC');
+
+SELECT * FROM TEMPP;
+TRUNCATE TABLE TEMPP;
+
+-- TABLE OUTPUT 
+
+	MSG
+	STRING 1 FOUND IN STRING 2
+	
+ 
+Q2. 2.	Create a stored function by the name of FUNC1 to take three parameters, the sides of a triangle. The function 
+should return a Boolean value:- TRUE if the triangle is valid, FALSE otherwise. A triangle is valid if the length of each side is
+ less than the sum of the lengths of the other two sides. Check if the dimensions entered can form a valid triangle. 
+ Calling program for the stored function need not be written.
+ 
+ CREATE TABLE TEMPP2
+(
+MSG VARCHAR(30)
+);
+
+DELIMITER //
+CREATE FUNCTION FUNC1(A INT , B INT , C INT)
+RETURNS BOOLEAN 
+DETERMINISTIC
+BEGIN
+IF (A+B > C) AND (B+C > A) AND (C+A > B) THEN 
+	RETURN TRUE;
+ELSE  
+	RETURN FALSE;
+END IF; 
+END; //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE PROC2(A INT , B INT , C INT)
+BEGIN
+DECLARE MESSAGE VARCHAR(30);
+SET MESSAGE = FUNC1(A , B , C);
+INSERT INTO TEMPP2 VALUES ('VALID TRIANGLE');
+END; //
+DELIMITER ;
+
+CALL PROC2(1 , 2 , 3);
+
+SELECT * FROM TEMPP2;
+
+-- OUTPUT TABLE
+
+	MSG
+	VALID TRIANGLE
+
